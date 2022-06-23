@@ -1,0 +1,5 @@
+# Pin dependencies for the docs
+# Should be kept up-to-date with setup.py
+sphinx==3.5.3
+typing-extensions==3.7.4.3
+myst-parser==0.13.5
