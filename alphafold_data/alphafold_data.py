@@ -1,5 +1,7 @@
 """Main module."""
 
+import logging
+from subprocess import CalledProcessError
 from typing import Dict
 from .sources import latest_sources, Source
 from pathlib import Path
@@ -15,8 +17,13 @@ class AFData:
 
     def download(self, force=False):
         # TODO parallelize
-        for db in self._sources.values():
-            db.download(self.data_dir, force=force)
+        for name, db in self._sources.items():
+            try:
+                db.download(self.data_dir, force=force)
+            except CalledProcessError as err:
+                logging.error(f"Error downloading {name}")
+                logging.error(str(err))
+                logging.error(str(err.stderr))
         return True
 
     def decompress(self, force=False):
