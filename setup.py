@@ -12,6 +12,7 @@ with open("CHANGELOG.md") as history_file:
 
 requirements = [
     "Click>=7.0",
+    "click_logging",
 ]
 
 setup_requirements = [
