@@ -17,6 +17,7 @@ class AFData:
 
     def download(self, force=False):
         # TODO parallelize
+        complete = True
         for name, db in self._sources.items():
             try:
                 db.download(self.data_dir, force=force)
@@ -24,12 +25,21 @@ class AFData:
                 logging.error(f"Error downloading {name}")
                 logging.error(str(err))
                 logging.error(str(err.stderr))
-        return True
+                complete = False
+        return complete
 
     def decompress(self, force=False):
-        for db in self._sources.values():
-            db.decompress(self.data_dir, force=force)
-        return True
+        complete = True
+        for name, db in self._sources.items():
+            try:
+                db.decompress(self.data_dir, force=force)
+            except CalledProcessError as err:
+                logging.error(f"Error decompressing {name}")
+                logging.error(str(err))
+                logging.error(str(err.stderr))
+                complete = False
+
+        return complete
 
     def prune(self):
         for db in self._sources.values():
@@ -37,4 +47,4 @@ class AFData:
         return True
 
     def update(self):
-        return self.download() and self.decompress() and self.prune()
+        return self.download() and self.decompress()

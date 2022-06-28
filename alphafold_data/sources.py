@@ -1,4 +1,5 @@
 import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import run
@@ -6,6 +7,7 @@ from typing import Dict
 
 
 def download_rsync(url: str, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         "rsync",
         url,
@@ -16,28 +18,32 @@ def download_rsync(url: str, dst: Path) -> None:
 
 
 def download_curl(url: str, dst: Path) -> None:
-    cmd = ["curl", "-o", str(dst), url]
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dst.with_name(dst.name+".partial")
+    cmd = ["curl", "-o", str(tmp), url]
     logging.debug("Running: " + " ".join(cmd))
     result = run(cmd)
     result.check_returncode()
+    tmp.rename(dst)
 
 
 def download_file(url: str, dst: Path) -> None:
-    dst.parent.mkdir(parents=True, exist_ok=True)
     # TODO choose smarter
     download_curl(url, dst)
 
 
 def decompress_tar(src: Path, dst: Path) -> None:
-    cmd = ["tar", "xf", str(src), str(dst)]
+    dst.mkdir(parents=True, exist_ok=True)
+    cmd = ["tar", "-xf", str(src), "-C", os.path.join(dst, "")]
     logging.debug("Running: " + " ".join(cmd))
     result = run(cmd)
     result.check_returncode()
 
 
 def decompress_tgz(src: Path, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
     logging.info("decompress tgz")
-    raise IOError("Not implemented")
+    raise NotImplementedError()
 
 
 @dataclass
@@ -73,8 +79,8 @@ class Source:
                 Path(data_dir, self.compressed), Path(data_dir, self.uncompressed)
             )
 
-    # def purge(self):
-    #     ...
+    def prune(self):
+        raise NotImplementedError()
 
     def compressed_available(self, data_dir: Path):
         "Check if compressed files are downloaded"
@@ -111,11 +117,33 @@ class ParamSource(Source):
         return decompress_tar(src, dst)
 
 
+class BFDSource(Source):
+    def __init__(self, version: str):
+        if version != "6a634dc6eb105c2e9b4cba7bbae93412":
+            raise ValueError(f"URL not known for BDF version {version}")
+        super().__init__(
+            flag="bfd_database_path",
+            url="https://storage.googleapis.com/alphafold-databases/casp14_versions/"
+            "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz",
+            compressed=Path(
+                f"bfd/{version}/"
+                "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz"
+            ),
+            uncompressed=Path(
+                f"bfd/{version}/"
+                "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
+            ),
+        )
+        self.version = version
+
+
 def latest_sources():
     # TODO detect latest versions
-    _latest_sources: Dict[str, Source] = {}
-    _latest_sources["params"] = ParamSource(version="2021-10-27")
-    return _latest_sources
+    sources: Dict[str, Source] = {
+        "params": ParamSource(version="2021-10-27"),
+        "bfd": BFDSource(version="6a634dc6eb105c2e9b4cba7bbae93412"),
+    }
+    return sources
     # bfd = Source(
     #     version="6a634dc6eb105c2e9b4cba7bbae93412"
     #     flag="bfd_database_path",

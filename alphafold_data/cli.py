@@ -25,7 +25,7 @@ def main(ctx, data_dir):
     """Shared parameters"""
     ctx.ensure_object(dict)
 
-    logging.info(f"data_dir({type(data_dir)})={data_dir!r}")
+    logging.debug(f"data_dir={data_dir!r}")
     if not Path(data_dir).is_dir():
         logging.error(f"does not exist or not a directory: {data_dir}")
         return 1
