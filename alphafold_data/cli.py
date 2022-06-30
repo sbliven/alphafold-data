@@ -83,5 +83,14 @@ def link(ctx):
     else:
         return 1
 
+
+@main.command(help="Summarize installation status")
+@click.pass_context
+def status(ctx):
+    afd = ctx.obj["data"]
+    logging.info(afd.status())
+    return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover

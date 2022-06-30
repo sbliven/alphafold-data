@@ -181,11 +181,11 @@ class BFDSource(Source):
             url="https://storage.googleapis.com/alphafold-databases/casp14_versions/"
             "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz",
             compressed=Path(
-                f"bfd/{version}/"
+                f"compressed/bfd/{version}/"
                 "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz"
             ),
             uncompressed=Path(
-                f"bfd/{version}/"
+                f"uncompressed/bfd/{version}/"
                 "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
             ),
         )
@@ -200,8 +200,8 @@ class MgnifySource(Source):
             flag="mgnify_database_path",
             url="https://storage.googleapis.com/alphafold-databases/casp14_versions/"
             f"mgy_clusters_{version}.fa.gz",
-            compressed=Path(f"mgnify/{version}/mgy_clusters.fa.gz"),
-            uncompressed=Path(f"mgnify/{version}/" "mgy_clusters.fa"),
+            compressed=Path(f"compressed/mgnify/{version}/mgy_clusters.fa.gz"),
+            uncompressed=Path(f"uncompressed/mgnify/{version}/" "mgy_clusters.fa"),
         )
         self.version = version
 
@@ -216,11 +216,11 @@ class MgnifySource(Source):
 #             flag="template_mmcif_dir",
 #             url="rsync.rcsb.org::ftp_data/structures/divided/mmCIF/",
 #             compressed=Path(
-#                 f"mgnify/{version}/"
+#                 f"compressed/mgnify/{version}/"
 #                 "mgy_clusters_{version}.fa.gz"
 #             ),
 #             uncompressed=Path(
-#                 f"mgnify/{version}/"
+#                 f"uncompressed/mgnify/{version}/"
 #                 "mgy_clusters.fa"
 #             ),
 #         )
@@ -233,11 +233,11 @@ class MgnifySource(Source):
 #             url="http://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/"
 #             f"old-releases/pdb70_from_mmcif_{version}.tar.gz"
 #             compressed=Path(
-#                 f"pdb70/{version}/"
+#                 f"compressed/pdb70/{version}/"
 #                 "pdb70_from_mmcif.tar.gz"
 #             ),
 #             uncompressed=Path(
-#                 f"mgnify/{version}/"
+#                 f"uncompressed/mgnify/{version}/"
 #                 "pdb70_from_mmcif"
 #             ),
 #         )
