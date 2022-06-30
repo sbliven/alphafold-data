@@ -1,10 +1,11 @@
 """Main module."""
 
 import logging
+from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Dict
-from .sources import latest_sources, Source
-from pathlib import Path
+
+from .sources import Source, latest_sources
 
 
 class AFData:

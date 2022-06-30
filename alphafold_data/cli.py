@@ -1,10 +1,11 @@
 """Console script for alphafold_data."""
 import logging
 import sys
+from pathlib import Path
 
 import click
-import click_logging
-from pathlib import Path
+import click_logging  # type: ignore
+
 from .alphafold_data import AFData
 
 logger = logging.getLogger()
@@ -81,7 +82,6 @@ def link(ctx):
         return 0
     else:
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover
