@@ -127,14 +127,14 @@ class Source:
         "Decompress compressed files"
         if not self.compressed_available(data_dir):
             raise IOError(
-                f"Compressed file not found: {Path(data_dir,self.compressed)}"
+                f"Compressed file not found: {Path(data_dir, self.compressed)}"
             )
         if force or not self.uncompressed_available(data_dir):
             self._force_decompress(
                 Path(data_dir, self.compressed), Path(data_dir, self.uncompressed)
             )
 
-    def prune(self):
+    def prune(self, data_dir: Path):
         raise NotImplementedError()
 
     def compressed_available(self, data_dir: Path):
@@ -178,8 +178,10 @@ class BFDSource(Source):
             raise ValueError(f"URL not known for BDF version {version}")
         super().__init__(
             flag="bfd_database_path",
-            url="https://storage.googleapis.com/alphafold-databases/casp14_versions/"
-            "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz",
+            url=(
+                "https://storage.googleapis.com/alphafold-databases/casp14_versions/"
+                "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz"
+            ),
             compressed=Path(
                 f"compressed/bfd/{version}/"
                 "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz"
@@ -195,13 +197,19 @@ class BFDSource(Source):
 
 
 class MgnifySource(Source):
-    def __init__(self, version: str):
+    def __init__(self, version: str, alphafold_version="casp14_versions"):
         super().__init__(
             flag="mgnify_database_path",
-            url="https://storage.googleapis.com/alphafold-databases/casp14_versions/"
-            f"mgy_clusters_{version}.fa.gz",
-            compressed=Path(f"compressed/mgnify/{version}/mgy_clusters.fa.gz"),
-            uncompressed=Path(f"uncompressed/mgnify/{version}/" "mgy_clusters.fa"),
+            url=(
+                f"https://storage.googleapis.com/alphafold-databases/"
+                f"{alphafold_version}/mgy_clusters_{version}.fa.gz"
+            ),
+            compressed=Path(
+                f"compressed/mgnify/{version}/mgy_clusters_{version}.fa.gz"
+            ),
+            uncompressed=Path(
+                f"uncompressed/mgnify/{version}/mgy_clusters_{version}.fa"
+            ),
         )
         self.version = version
 
@@ -210,11 +218,23 @@ class MgnifySource(Source):
         return decompress_gunzip(src, dst)
 
 
+class PDB70Source(Source):
+    def __init__(self, version: str):
+        super().__init__(
+            flag="pdb70_database_path",
+            url=f"http://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/"
+            f"old-releases/pdb70_from_mmcif_{version}.tar.gz",
+            compressed=Path(f"compressed/pdb70/{version}/" f"pdb70_from_mmcif.tar.gz"),
+            uncompressed=Path(f"uncompressed/mgnify/{version}/" f"pdb70_from_mmcif"),
+        )
+        self.version = version
+
+
 # class TemplateMMcifSource(Source):
 #     def __init__(self, version: str):
 #         super().__init__(
 #             flag="template_mmcif_dir",
-#             url="rsync.rcsb.org::ftp_data/structures/divided/mmCIF/",
+#             url="rsync.ebi.ac.uk::pub/databases/pdb/data/structures/divided/mmCIF/",
 #             compressed=Path(
 #                 f"compressed/mgnify/{version}/"
 #                 "mgy_clusters_{version}.fa.gz"
@@ -226,30 +246,62 @@ class MgnifySource(Source):
 #         )
 #         self.version = version
 
-# class PDB70Source(Source):
-#     def __init__(self, version: str):
+
+class Uniclust30Source(Source):
+    def __init__(self, version: str, alphafold_version="casp14_versions"):
+        super().__init__(
+            flag="uniclust30_database_path",
+            url=(
+                f"https://storage.googleapis.com/alphafold-databases/"
+                f"{alphafold_version}/UniRef30_{version}.tar.gz"
+            ),
+            compressed=Path(
+                f"compressed/uniclust30/{version}/UniRef30_{version}.tar.gz"
+            ),
+            uncompressed=Path(f"uncompressed/uniclust30/{version}/UniRef30_{version}"),
+        )
+        self.version = version
+
+
+# class Uniref90Source(Source):
+#     def __init__(self, version: str, alphafold_version="casp14_versions"):
 #         super().__init__(
-#             flag="template_mmcif_dir",
-#             url="http://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/"
-#             f"old-releases/pdb70_from_mmcif_{version}.tar.gz"
+#             flag="mgnify_database_path",
+#             url=(
+#                 "https://ftp.ebi.ac.uk/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz"
+#                 f"https://storage.googleapis.com/alphafold-databases/"
+#                 f"{alphafold_version}/mgy_clusters_{version}.fa.gz"
+#             ),
 #             compressed=Path(
-#                 f"compressed/pdb70/{version}/"
-#                 "pdb70_from_mmcif.tar.gz"
+#                 f"compressed/mgnify/{version}/mgy_clusters_{version}.fa.gz"
 #             ),
 #             uncompressed=Path(
-#                 f"uncompressed/mgnify/{version}/"
-#                 "pdb70_from_mmcif"
+#                 f"uncompressed/mgnify/{version}/mgy_clusters_{version}.fa"
 #             ),
 #         )
 #         self.version = version
 
+#     @classmethod
+#     def _force_decompress(kls, src: Path, dst: Path) -> None:
+#         return decompress_gunzip(src, dst)
+
 
 def latest_sources():
     # TODO detect latest versions
+    # For now, update according to
+    # https://github.com/google-deepmind/alphafold/blob/main/scripts/
     sources: Dict[str, Source] = {
-        "params": ParamSource("2022-03-02"),
-        "bfd": BFDSource("6a634dc6eb105c2e9b4cba7bbae93412"),
-        "mgnify": MgnifySource("2018_12"),
+        "params": ParamSource("2022-12-06"),
+        "bfd": BFDSource(
+            "6a634dc6eb105c2e9b4cba7bbae93412"
+        ),  # casp14_version. Not usually updated.
+        "mgnify": MgnifySource("2022_05", alphafold_version="v2.3"),
+        "pdb70": PDB70Source("200401"),
+        # "mmcif": TemplateMMcifSource(...),
+        # "seqres": ...,
+        # "uniprot": UniprotSource(...),
+        "uniref30": Uniclust30Source("2021_03", alphafold_version="v2.3"),
+        # "uniref90": Uniref90Source(...),
     }
     return sources
     # bfd = Source(

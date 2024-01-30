@@ -1,4 +1,5 @@
 """Console script for alphafold_data."""
+
 import logging
 import sys
 from pathlib import Path
